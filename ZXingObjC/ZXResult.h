@@ -21,10 +21,17 @@
  * Encapsulates the result of decoding a barcode within an image.
  */
 
+#import "ZXBarcodeFormat.h"
+#import "ZXResultMetadataType.h"
+
+/**
+ * Encapsulates the result of decoding a barcode within an image.
+ */
+
 @interface ZXResult : NSObject
 
 @property (nonatomic, copy,   readonly) NSString *text;
-@property (nonatomic, assign, readonly) unsigned char *rawBytes;
+@property (nonatomic, retain, readonly) NSArray *bytes;
 @property (nonatomic, assign, readonly) int length;
 @property (nonatomic, retain, readonly) NSMutableArray *resultPoints;
 @property (nonatomic, assign, readonly) ZXBarcodeFormat barcodeFormat;
@@ -34,7 +41,7 @@
 - (id)initWithText:(NSString *)text rawBytes:(unsigned char *)rawBytes length:(unsigned int)length resultPoints:(NSArray *)resultPoints format:(ZXBarcodeFormat)format;
 - (id)initWithText:(NSString *)text rawBytes:(unsigned char *)rawBytes length:(unsigned int)length resultPoints:(NSArray *)resultPoints format:(ZXBarcodeFormat)format timestamp:(long)timestamp;
 + (id)resultWithText:(NSString *)text rawBytes:(unsigned char *)rawBytes length:(unsigned int)length resultPoints:(NSArray *)resultPoints format:(ZXBarcodeFormat)format;
-+ (id)resultWithText:(NSString *)text rawBytes:(unsigned char *)rawBytes length:(unsigned int)length resultPoints:(NSArray *)resultPoints format:(ZXBarcodeFormat)format timestamp:(long)timestamp;
++ (id)resultWithText:(NSString *)text bytes:(NSArray *)bytes length:(unsigned int)length resultPoints:(NSArray *)resultPoints format:(ZXBarcodeFormat)format;
 - (void)putMetadata:(ZXResultMetadataType)type value:(id)value;
 - (void)putAllMetadata:(NSMutableDictionary *)metadata;
 - (void)addResultPoints:(NSArray *)newPoints;
