@@ -1,3 +1,14 @@
+Fork purpose and target
+=========
+
+Improve stability, performance and completeness of library.
+
+Current changes
+----
+
+* Move scanning to other thread.
+* Change rawBytes (unsigned char *) to NSArray * consisted of NSNumber.
+
 ZXingObjC
 =========
 
