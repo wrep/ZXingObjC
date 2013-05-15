@@ -1,4 +1,4 @@
-Fork purpose and target
+Purpose of this fork
 =========
 
 Improve stability, performance and completeness of library.
