@@ -485,8 +485,6 @@ int const CODE_STOP = 106;
         rawBytes[i] = [[rawCodes objectAtIndex:i] charValue];
     }
     
-    NSLog(@"Left: %f, Right: %f, row: %d", left, right, rowNumber);
-    
     return [ZXResult resultWithText:result
                            rawBytes:rawBytes
                              length:rawCodesSize

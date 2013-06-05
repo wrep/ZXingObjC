@@ -51,52 +51,52 @@ static bool isIPad();
 
 // Adapted from http://blog.coriolis.ch/2009/09/04/arbitrary-rotation-of-a-cgimage/ and https://github.com/JanX2/CreateRotateWriteCGImage
 - (CGImageRef)rotateImage:(CGImageRef)original degrees:(float)degrees {
-    if (degrees == 0.0f) {
-        return original;
-    } else {
-        double radians = degrees * M_PI / 180;
-        
-#if TARGET_OS_EMBEDDED || TARGET_IPHONE_SIMULATOR
-        radians = -1 * radians;
-#endif
-        
-        size_t _width = CGImageGetWidth(original);
-        size_t _height = CGImageGetHeight(original);
-        
-        CGRect imgRect = CGRectMake(0, 0, _width, _height);
-        CGAffineTransform _transform = CGAffineTransformMakeRotation(radians);
-        CGRect rotatedRect = CGRectApplyAffineTransform(imgRect, _transform);
-        
-        CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-        CGContextRef context = CGBitmapContextCreate(NULL,
-                                                     rotatedRect.size.width,
-                                                     rotatedRect.size.height,
-                                                     CGImageGetBitsPerComponent(original),
-                                                     0,
-                                                     colorSpace,
-                                                     kCGImageAlphaPremultipliedFirst);
-        CGContextSetAllowsAntialiasing(context, FALSE);
-        CGContextSetInterpolationQuality(context, kCGInterpolationNone);
-        CGColorSpaceRelease(colorSpace);
-        
-        CGContextTranslateCTM(context,
-                              +(rotatedRect.size.width/2),
-                              +(rotatedRect.size.height/2));
-        CGContextRotateCTM(context, radians);
-        
-        CGContextDrawImage(context, CGRectMake(-imgRect.size.width/2,
-                                               -imgRect.size.height/2,
-                                               imgRect.size.width,
-                                               imgRect.size.height),
-                           original);
-        
-        CGImageRef rotatedImage = CGBitmapContextCreateImage(context);
-        [NSMakeCollectable(rotatedImage) autorelease];
-        
-        CFRelease(context);
-        
-        return rotatedImage;
-    }
+        if (degrees == 0.0f) {
+                return original;
+            } else {
+                    double radians = degrees * M_PI / 180;
+            
+            #if TARGET_OS_EMBEDDED || TARGET_IPHONE_SIMULATOR
+                        radians = -1 * radians;
+            #endif
+            
+                    size_t _width = CGImageGetWidth(original);
+                    size_t _height = CGImageGetHeight(original);
+            
+                    CGRect imgRect = CGRectMake(0, 0, _width, _height);
+                    CGAffineTransform _transform = CGAffineTransformMakeRotation(radians);
+                    CGRect rotatedRect = CGRectApplyAffineTransform(imgRect, _transform);
+            
+                    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                   CGContextRef context = CGBitmapContextCreate(NULL,
+                                                                                                                       rotatedRect.size.width,
+                                                                                                                       rotatedRect.size.height,
+                                                                                                                       CGImageGetBitsPerComponent(original),
+                                                                                                                       0,
+                                                                                                                       colorSpace,
+                                                                                                                       kCGImageAlphaPremultipliedFirst);
+                    CGContextSetAllowsAntialiasing(context, FALSE);
+                    CGContextSetInterpolationQuality(context, kCGInterpolationNone);
+                    CGColorSpaceRelease(colorSpace);
+            
+                    CGContextTranslateCTM(context,
+                                                                        +(rotatedRect.size.width/2),
+                                                                        +(rotatedRect.size.height/2));
+                    CGContextRotateCTM(context, radians);
+            
+                    CGContextDrawImage(context, CGRectMake(-imgRect.size.width/2,
+                                                                                                          -imgRect.size.height/2,
+                                                                                                          imgRect.size.width,
+                                                                                                          imgRect.size.height),
+                                                                  original);
+            
+                    CGImageRef rotatedImage = CGBitmapContextCreateImage(context);
+                    [NSMakeCollectable(rotatedImage) autorelease];
+            
+                    CFRelease(context);
+            
+                    return rotatedImage;
+                }
 }
 
 - (ZXCapture *)init {
@@ -306,6 +306,7 @@ static bool isIPad();
         
 #pragma mark - setter for AVCaptureVideoDataOutputSampleBufferDelegate method
         dispatch_queue_t queueConcurent = dispatch_queue_create("myQueue", NULL);
+//        dispatch_queue_t queueConcurent = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
         [output ZXQT(setDelegate:)ZXAV(setSampleBufferDelegate:)self
          ZXAV(queue:queueConcurent)];
         dispatch_release(queueConcurent);
@@ -545,7 +546,7 @@ fromConnection:(ZXCaptureConnection *)connection {
                formatDescriptionAttributes] objectForKey:@"videoEncodedPixelsSize"] sizeValue];
             width = size.width;
             height = size.height;
-            // NSLog(@"reported: %f x %f", size.width, size.height);
+
             [self performSelectorOnMainThread:@selector(setOutputAttributes) withObject:nil waitUntilDone:NO];
             reported_width = size.width;
             reported_height = size.height;
@@ -560,7 +561,7 @@ fromConnection:(ZXCaptureConnection *)connection {
         if (!reported_width || !reported_height) {
             reported_width = CVPixelBufferGetWidth(videoFrame);
             reported_height = CVPixelBufferGetHeight(videoFrame);
-            NSLog(@"Reported size: %ld, %ld", reported_width, reported_height);
+            
             if ([delegate respondsToSelector:@selector(captureSize:width:height:)]) {
                 [delegate captureSize:self
                                 width:[NSNumber numberWithFloat:reported_width]
@@ -595,14 +596,8 @@ fromConnection:(ZXCaptureConnection *)connection {
     }
 #endif
     
-    CGImageRef videoFrameImage = [ZXCGImageLuminanceSource createImageFromBuffer:videoFrame];
-    CGImageRef rotatedImage = [self rotateImage:videoFrameImage degrees:rotation];
-    
-    ZXCGImageLuminanceSource *source
-    = [[[ZXCGImageLuminanceSource alloc]
-        initWithCGImage:rotatedImage]
-       autorelease];
-    
+    ZXCGImageLuminanceSource *source = [[[ZXCGImageLuminanceSource alloc] initWithBuffer:videoFrame rotation:rotation] autorelease];
+
     if (luminance) {
         CGImageRef image = source.image;
         CGImageRetain(image);
