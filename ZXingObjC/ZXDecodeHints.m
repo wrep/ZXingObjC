@@ -25,14 +25,8 @@
 
 @implementation ZXDecodeHints
 
-@synthesize assumeCode39CheckDigit;
-@synthesize allowedLengths;
-@synthesize barcodeFormats;
-@synthesize encoding;
-@synthesize other;
-@synthesize pureBarcode;
-@synthesize resultPointCallback;
-@synthesize tryHarder;
+@synthesize assumeCode39CheckDigit, allowedLengths, barcodeFormats, encoding, other, pureBarcode, resultPointCallback,
+            tryHarder, substitutions;
 
 - (id)init {
   if (self = [super init]) {
@@ -71,6 +65,7 @@
   [barcodeFormats release];
   [other release];
   [resultPointCallback release];
+  [substitutions release];
 
   [super dealloc];
 }

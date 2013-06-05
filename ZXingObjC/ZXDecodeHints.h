@@ -63,6 +63,8 @@
  */
 @property (nonatomic, assign) BOOL tryHarder;
 
+@property (nonatomic, retain) NSDictionary *substitutions;
+
 /**
  * Image is known to be of one of a few possible formats.
  */
