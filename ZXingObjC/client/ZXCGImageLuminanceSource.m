@@ -283,7 +283,7 @@
         if(rotation == 0.0f) {
             bgrPixel = data[y*Longer+i];
         } else if(rotation == 90.0f) {
-            bgrPixel = data[(Shorter-i)*Longer+y];
+            bgrPixel = data[i*Longer+y];
         } else if(rotation == 180.0f) {
             bgrPixel= data[(Shorter-y)*Longer + Shorter - i];
         } else if(rotation == 270.0f) {
