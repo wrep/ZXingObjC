@@ -1418,6 +1418,9 @@
 		25FE5D4016D0B84C00826CDB /* RSSExpandedStackedInternalTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D3F16D0B84C00826CDB /* RSSExpandedStackedInternalTestCase.m */; };
 		25FE5D4316D0B8B200826CDB /* TestCaseUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D4216D0B8B200826CDB /* TestCaseUtil.m */; };
 		25FE5D4516D1997C00826CDB /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 25FE5D4416D1997C00826CDB /* Resources */; };
+		6921C1E81760E4F000773CAF /* ZXBufferLuminanceSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 6921C1E61760E4F000773CAF /* ZXBufferLuminanceSource.h */; };
+		6921C1E91760E4F000773CAF /* ZXBufferLuminanceSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6921C1E71760E4F000773CAF /* ZXBufferLuminanceSource.m */; };
+		6921C1EA1760E4F000773CAF /* ZXBufferLuminanceSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6921C1E71760E4F000773CAF /* ZXBufferLuminanceSource.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2111,6 +2114,8 @@
 		25FE5D4116D0B8B100826CDB /* TestCaseUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestCaseUtil.h; sourceTree = "<group>"; };
 		25FE5D4216D0B8B200826CDB /* TestCaseUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestCaseUtil.m; sourceTree = "<group>"; };
 		25FE5D4416D1997C00826CDB /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources; sourceTree = "<group>"; };
+		6921C1E61760E4F000773CAF /* ZXBufferLuminanceSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZXBufferLuminanceSource.h; sourceTree = "<group>"; };
+		6921C1E71760E4F000773CAF /* ZXBufferLuminanceSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZXBufferLuminanceSource.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2374,6 +2379,8 @@
 				25403D4D166A9A0800E13304 /* ZXImage.h */,
 				25403D4E166A9A0800E13304 /* ZXImage.m */,
 				25403D4F166A9A0800E13304 /* ZXView.h */,
+				6921C1E61760E4F000773CAF /* ZXBufferLuminanceSource.h */,
+				6921C1E71760E4F000773CAF /* ZXBufferLuminanceSource.m */,
 			);
 			name = client;
 			path = ZXingObjC/client;
@@ -3541,6 +3548,7 @@
 				2542997516D46E8500D4C045 /* ZXDimension.h in Headers */,
 				2504D4C616F698AA00DF8882 /* ZXInvertedLuminanceSource.h in Headers */,
 				2504D9CF16FFD2E200DF8882 /* ZXAztecCode.h in Headers */,
+				6921C1E81760E4F000773CAF /* ZXBufferLuminanceSource.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4295,6 +4303,7 @@
 				2504D9D016FFD2E200DF8882 /* ZXAztecCode.m in Sources */,
 				2504D9D816FFD3D400DF8882 /* ZXAztecWriter.m in Sources */,
 				2504D9DD16FFD4CD00DF8882 /* ZXAztecEncoder.m in Sources */,
+				6921C1E91760E4F000773CAF /* ZXBufferLuminanceSource.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4416,6 +4425,7 @@
 				25429A1016D5F66D00D4C045 /* ZXSymbolInfoTestCase.m in Sources */,
 				2504D9E916FFF2A900DF8882 /* ZXAztecEncoderTest.m in Sources */,
 				2504D9EC170005FE00DF8882 /* ReedSolomonTestCase.m in Sources */,
+				6921C1EA1760E4F000773CAF /* ZXBufferLuminanceSource.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

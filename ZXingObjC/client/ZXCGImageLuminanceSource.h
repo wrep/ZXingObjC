@@ -21,29 +21,17 @@
 
 @interface ZXCGImageLuminanceSource : ZXLuminanceSource {
     CGImageRef image;
-    uint32_t *data;
+    unsigned char *data;
     int left;
     int top;
-    float rotation;
-    int bufferWidth;
-    int bufferHeight;
 }
 
 + (CGImageRef)createImageFromBuffer:(CVImageBufferRef)buffer;
-+ (CGImageRef)createImageFromBuffer:(CVImageBufferRef)buffer
-                           rotation:(CGFloat)rotation;
 + (CGImageRef)createImageFromBuffer:(CVImageBufferRef)buffer
                                left:(size_t)left
                                 top:(size_t)top
                               width:(size_t)width
                              height:(size_t)height;
-
-+ (CGImageRef)createImageFromBuffer:(CVImageBufferRef)buffer
-                               left:(size_t)left
-                                top:(size_t)top
-                              width:(size_t)width
-                             height:(size_t)height
-                           rotation:(CGFloat)rotation;
 
 - (id)initWithZXImage:(ZXImage *)image
                  left:(size_t)left
@@ -68,7 +56,6 @@
               height:(size_t)height;
 
 - (id)initWithBuffer:(CVPixelBufferRef)buffer;
-- (id)initWithBuffer:(CVPixelBufferRef)buffer rotation:(CGFloat)degrees;
 
 - (CGImageRef)image;
 

@@ -18,6 +18,7 @@
 
 #if !TARGET_IPHONE_SIMULATOR
 #include "ZXCGImageLuminanceSource.h"
+#include "ZXBufferLuminanceSource.h"
 #include "ZXBinaryBitmap.h"
 #include "ZXDecodeHints.h"
 #include "ZXHybridBinarizer.h"
@@ -595,17 +596,17 @@ fromConnection:(ZXCaptureConnection *)connection {
         self.captureToFilename = nil;
     }
 #endif
-    
-    ZXCGImageLuminanceSource *source = [[[ZXCGImageLuminanceSource alloc] initWithBuffer:videoFrame rotation:rotation] autorelease];
+    ZXBufferLuminanceSource *source = [[[ZXBufferLuminanceSource alloc] initWithBuffer:videoFrame rotation:rotation] autorelease];
 
-    if (luminance) {
-        CGImageRef image = source.image;
-        CGImageRetain(image);
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
-            luminance.contents = (id)image;
-            CGImageRelease(image);
-        });
-    }
+    //Currently we do not support luminance
+//    if (luminance) {
+//        CGImageRef image = source.image;
+//        CGImageRetain(image);
+//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0), dispatch_get_main_queue(), ^{
+//            luminance.contents = (id)image;
+//            CGImageRelease(image);
+//        });
+//    }
     
     if (binary || delegate) {
         ZXHybridBinarizer *binarizer = [ZXHybridBinarizer alloc];

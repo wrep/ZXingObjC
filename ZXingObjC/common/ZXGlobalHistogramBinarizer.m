@@ -96,6 +96,8 @@ int const LUMINANCE_BUCKETS = 1 << LUMINANCE_BITS;
     center = right;
   }
 
+    free(localLuminances);
+
   return row;
 }
 

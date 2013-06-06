@@ -35,34 +35,10 @@
 }
 
 + (CGImageRef)createImageFromBuffer:(CVImageBufferRef)buffer
-                           rotation:(CGFloat)rotation {
-    return [self createImageFromBuffer:buffer
-                                  left:0
-                                   top:0
-                                 width:CVPixelBufferGetWidth(buffer)
-                                height:CVPixelBufferGetHeight(buffer)
-                              rotation:rotation];
-}
-
-+ (CGImageRef)createImageFromBuffer:(CVImageBufferRef)buffer
                                left:(size_t)left
                                 top:(size_t)top
                               width:(size_t)width
                              height:(size_t)height {
-    return [self createImageFromBuffer:buffer
-                                  left:left
-                                   top:top
-                                 width:width
-                                height:height
-                              rotation:0.0f];
-}
-
-+ (CGImageRef)createImageFromBuffer:(CVImageBufferRef)buffer
-                               left:(size_t)left
-                                top:(size_t)top
-                              width:(size_t)width
-                             height:(size_t)height
-                           rotation:(CGFloat)rotation {
     int bytesPerRow = (int)CVPixelBufferGetBytesPerRow(buffer);
     int dataWidth = (int)CVPixelBufferGetWidth(buffer);
     int dataHeight = (int)CVPixelBufferGetHeight(buffer);
@@ -101,6 +77,7 @@
                                                     colorSpace,
                                                     kCGBitmapByteOrder32Little|
                                                     kCGImageAlphaNoneSkipFirst);
+    CGColorSpaceRelease(colorSpace);
     
     CGImageRef result = CGBitmapContextCreateImage(newContext);
     [NSMakeCollectable(result) autorelease];
@@ -108,49 +85,6 @@
     CGContextRelease(newContext);
     
     free(bytes);
-    
-    // Adapted from http://blog.coriolis.ch/2009/09/04/arbitrary-rotation-of-a-cgimage/ and https://github.com/JanX2/CreateRotateWriteCGImage
-    if(rotation != 0) {
-        double radians = rotation * M_PI / 180;
-        
-#if TARGET_OS_EMBEDDED || TARGET_IPHONE_SIMULATOR
-        radians = -1 * radians;
-#endif
-        
-        CGRect imgRect = CGRectMake(0, 0, width, height);
-        CGAffineTransform _transform = CGAffineTransformMakeRotation(radians);
-        CGRect rotatedRect = CGRectApplyAffineTransform(imgRect, _transform);
-        
-        CGContextRef context = CGBitmapContextCreate(NULL,
-                                                     rotatedRect.size.width,
-                                                     rotatedRect.size.height,
-                                                     CGImageGetBitsPerComponent(result),
-                                                     0,
-                                                     colorSpace,
-                                                     kCGImageAlphaPremultipliedFirst);
-        CGContextSetAllowsAntialiasing(context, FALSE);
-        CGContextSetInterpolationQuality(context, kCGInterpolationNone);
-        CGColorSpaceRelease(colorSpace);
-        
-        CGContextTranslateCTM(context,
-                              +(rotatedRect.size.width/2),
-                              +(rotatedRect.size.height/2));
-        CGContextRotateCTM(context, radians);
-        
-        CGContextDrawImage(context, CGRectMake(-imgRect.size.width/2,
-                                               -imgRect.size.height/2,
-                                               imgRect.size.width,
-                                               imgRect.size.height),
-                           result);
-        
-        
-        result = CGBitmapContextCreateImage(context);
-        [NSMakeCollectable(result) autorelease];
-        
-        CFRelease(context);
-    }
-    
-    CGColorSpaceRelease(colorSpace);
     
     return result;
 }
@@ -209,46 +143,6 @@
     return self;
 }
 
-//returned array should be freed later!
--(uint32_t *)copyBytesFromBuffer:(CVPixelBufferRef)buffer {
-    int bytesPerRow = (int)CVPixelBufferGetBytesPerRow(buffer);
-    int dataHeight = (int)CVPixelBufferGetHeight(buffer);
-
-    CVPixelBufferLockBaseAddress(buffer,0);
-    
-    uint32_t *baseAddress = (uint32_t *)CVPixelBufferGetBaseAddress(buffer);
-        
-    int size = bytesPerRow*dataHeight;
-    
-    uint32_t *bytes = (uint32_t*)malloc(size);
-    memcpy(bytes, baseAddress+top*bytesPerRow, size);
-    
-    CVPixelBufferUnlockBaseAddress(buffer, 0);
-    
-    return bytes;
-}
-
--(id)initWithBuffer:(CVPixelBufferRef)buffer rotation:(CGFloat)degrees {
-    if (self = [super init]) {
-        rotation = degrees;
-        
-        bufferWidth = CVPixelBufferGetWidth(buffer);
-        bufferHeight = CVPixelBufferGetHeight(buffer);
-        
-        width = bufferWidth;
-        height = bufferHeight;
-        
-        if(degrees == 90 || degrees == 270) {
-            width = bufferHeight;
-            height = bufferWidth;
-        }
-        
-        data = [self copyBytesFromBuffer: buffer];
-    }
-    
-    return self;
-}
-
 - (CGImageRef)image {
     return image;
 }
@@ -265,40 +159,17 @@
 }
 
 - (unsigned char *)row:(int)y {
-    /* iOS camera is always rotated 90 degrees. We assume that longer is width.*/
-    int Longer = bufferWidth;
-    int Shorter = bufferHeight;
-    int rowLength = self.width;
-    int rowCount = self.height;
-    
-    if (y < 0 || y >= rowCount) {
+    if (y < 0 || y >= self.height) {
         [NSException raise:NSInvalidArgumentException format:@"Requested row is outside the image: %d", y];
     }
     
-    unsigned char *row = (unsigned char *)malloc(rowLength * sizeof(unsigned char));
+    unsigned char *row = (unsigned char *)malloc(self.width * sizeof(unsigned char));
     
-    for(int i=0; i<rowLength; i++) {
-        uint32_t bgrPixel = 0;
-        //new scenario with bgra pixels
-        if(rotation == 0.0f) {
-            bgrPixel = data[y*Longer+i];
-        } else if(rotation == 90.0f) {
-            bgrPixel = data[i*Longer+y];
-        } else if(rotation == 180.0f) {
-            bgrPixel= data[(Shorter-y)*Longer + Shorter - i];
-        } else if(rotation == 270.0f) {
-            bgrPixel = data[(Shorter - i) + y];
-        } else {
-            [NSException raise:NSInvalidArgumentException format:@"Not supported rotation. Make sure degrees are in range: [0, 360) and is multiplication of 90."];
-        }
-        row[i] = [self processBGRAPixel:bgrPixel];
-        
-    }
-    
+    int offset = y * self.width;
+    memcpy(row, data + offset, self.width);
     return row;
 }
 
-//TODO !!!
 - (unsigned char *)matrix {
     int area = self.width * self.height;
     
@@ -314,18 +185,14 @@
     top = _top;
     self->width = _width;
     self->height = _height;
+    int sourceWidth = (int)CGImageGetWidth(cgimage);
+    int sourceHeight = (int)CGImageGetHeight(cgimage);
     
-    if(left != 0 || top != 0) {
-        //we assume that if no offset is set, then image has proper size
-        int sourceWidth = (int)CGImageGetWidth(cgimage);
-        int sourceHeight = (int)CGImageGetHeight(cgimage);
-        
-        if (left + self.width > sourceWidth ||
-            top + self.height > sourceHeight ||
-            top < 0 ||
-            left < 0) {
-            [NSException raise:NSInvalidArgumentException format:@"Crop rectangle does not fit within image data."];
-        }
+    if (left + self.width > sourceWidth ||
+        top + self.height > sourceHeight ||
+        top < 0 ||
+        left < 0) {
+        [NSException raise:NSInvalidArgumentException format:@"Crop rectangle does not fit within image data."];
     }
     
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
@@ -344,60 +211,36 @@
     CGContextRelease(context);
     CGColorSpaceRelease(colorSpace);
     
-    data = (uint32_t *)malloc(self.width * self.height * sizeof(uint32_t));
+    data = (unsigned char *)malloc(self.width * self.height * sizeof(unsigned char));
     
     for (int i = 0; i < self.height * self.width; i++) {
-        data[i] = pixelData[i];
+        uint32_t rgbPixel=pixelData[i];
+        
+        float red = (rgbPixel>>24)&0xFF;
+        float green = (rgbPixel>>16)&0xFF;
+        float blue = (rgbPixel>>8)&0xFF;
+        float alpha = (float)(rgbPixel & 0xFF) / 255.0f;
+        
+        // ImageIO premultiplies all PNGs, so we have to "un-premultiply them":
+        // http://code.google.com/p/cocos2d-iphone/issues/detail?id=697#c26
+        red = round((red / alpha) - 0.001f);
+        green = round((green / alpha) - 0.001f);
+        blue = round((blue / alpha) - 0.001f);
+        
+        if (red == green && green == blue) {
+            data[i] = red;
+        } else {
+            data[i] = (306 * (int)red +
+                       601 * (int)green +
+                       117 * (int)blue +
+                       (0x200)) >> 10; // 0x200 = 1<<9, half an lsb of the result to force rounding
+        }
     }
     
     free(pixelData);
     
     top = _top;
     left = _left;
-}
-
--(uint32_t)processBGRAPixel:(uint32_t)bgrPixel {
-    float alpha = (float)((bgrPixel>>24)&0xFF) / 255.0f;
-    float red = (bgrPixel>>16)&0xFF;
-    float green = (bgrPixel>>8)&0xFF;
-    float blue = (bgrPixel)&0xFF;
-    
-    // ImageIO premultiplies all PNGs, so we have to "un-premultiply them":
-    // http://code.google.com/p/cocos2d-iphone/issues/detail?id=697#c26
-    red = round((red / alpha) - 0.001f);
-    green = round((green / alpha) - 0.001f);
-    blue = round((blue / alpha) - 0.001f);
-    
-    if (red == green && green == blue) {
-        return red;
-    } else {
-        return (306 * (int)red +
-                601 * (int)green +
-                117 * (int)blue +
-                (0x200)) >> 10; // 0x200 = 1<<9, half an lsb of the result to force rounding
-    }
-}
-
--(uint32_t)processRGBPixel:(uint32_t)rgbPixel {
-    float red = (rgbPixel>>24)&0xFF;
-    float green = (rgbPixel>>16)&0xFF;
-    float blue = (rgbPixel>>8)&0xFF;
-    float alpha = (float)(rgbPixel & 0xFF) / 255.0f;
-    
-    // ImageIO premultiplies all PNGs, so we have to "un-premultiply them":
-    // http://code.google.com/p/cocos2d-iphone/issues/detail?id=697#c26
-    red = round((red / alpha) - 0.001f);
-    green = round((green / alpha) - 0.001f);
-    blue = round((blue / alpha) - 0.001f);
-    
-    if (red == green && green == blue) {
-        return red;
-    } else {
-        return (306 * (int)red +
-                   601 * (int)green +
-                   117 * (int)blue +
-                   (0x200)) >> 10; // 0x200 = 1<<9, half an lsb of the result to force rounding
-    }
 }
 
 - (BOOL)rotateSupported {
