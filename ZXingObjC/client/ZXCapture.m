@@ -353,7 +353,6 @@ static bool isIPad();
   if (delegate) {
     hard_stop = false;
   }
-  [self start_stop];
 }
 
 - (void)hard_stop {
@@ -433,7 +432,6 @@ static bool isIPad();
     if (binary && binary.superlayer != layer) {
       // [layer addSublayer:binary];
     }
-    [self start_stop];
   } else if ([key isEqualToString:kCAOnOrderOut]) {
     if (order_out_skip) {
       --order_out_skip;
@@ -443,7 +441,6 @@ static bool isIPad();
 
     on_screen = false;
     // NSLog(@"order out");
-    [self start_stop];
   }
 }
 
